@@ -1,9 +1,10 @@
 import Firebase from "./firebase";
+import { isBrowser } from '../lib/auth'
 
 let instance: Firebase = null;
 
 export default function getFirebase() {
-  if (typeof window !== 'undefined') {
+  if (isBrowser) {
     if (instance) return instance;
 
     instance = new Firebase();

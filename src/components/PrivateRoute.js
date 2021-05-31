@@ -1,17 +1,20 @@
-import React, { useContext } from "react"
+import React from "react"
+import PropTypes from "prop-types"
 import { navigate } from "gatsby"
-import { FirebaseContext } from "../services/firebase"
+import { isLoggedIn } from "../lib/auth";
 import * as ROUTES from "../lib/routes"
 
-
-export default function PrivateRoute({ component: Component, location, ...rest }) {
-  const user = useContext(FirebaseContext)
-
-  if (!user && location.pathname !== ROUTES.LOGIN) {
-    // If we’re not logged in, redirect to the home page.
-    navigate(`/app/login`, { replace: true })
+const PrivateRoute = ({ component: Component, location, ...rest }) => {
+  if (!isLoggedIn() && location.pathname !== ROUTES.LOGIN) {
+    navigate(ROUTES.LOGIN)
     return null
   }
 
   return <Component {...rest} />
 }
+
+PrivateRoute.propTypes = {
+  component: PropTypes.any.isRequired,
+}
+
+export default PrivateRoute

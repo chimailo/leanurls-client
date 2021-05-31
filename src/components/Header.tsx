@@ -1,6 +1,7 @@
 import React, { useContext } from "react"
 import { navigate } from "gatsby"
-import AppBar from "@material-ui/core/AppBar"
+import AppBar, { AppBarProps } from "@material-ui/core/AppBar"
+import Avatar from "@material-ui/core/Avatar"
 import Box from "@material-ui/core/Box"
 import Button from "@material-ui/core/Button"
 import Container from "@material-ui/core/Container"
@@ -10,23 +11,15 @@ import { createStyles, makeStyles, Theme, withStyles } from "@material-ui/core/s
 import { grey } from '@material-ui/core/colors/'
 
 import Link from "./Link"
-import * as ROUTES from "../lib/routes"
-import { FirebaseContext } from "../services/firebase"
+import useFirebase from '../useFirebase'
+import { isLoggedIn, logout } from "../lib/auth"
 import { LogoIcon } from './svg'
+import * as ROUTES from "../lib/routes"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    link: {
-      borderRadius: 8,
-      fontWeight: 500,
-      padding: theme.spacing(1),
-      margin: theme.spacing(0, 2),
-      "&:hover": {
-        backgroundColor: theme.palette.grey[100],
-      },
-    },
     brandName: {
-      fontSize: '2rem',
+      fontSize: '1.5rem',
       fontWeight: 'bold',
       marginLeft: theme.spacing(2),
     },
@@ -40,30 +33,32 @@ const StyledButton = withStyles((theme: Theme) => ({
   root: {
     borderRadius: 8,
     textTransform: 'capitalize',
-    marginLeft: theme.spacing(2),
+    marginLeft: theme.spacing(1),
     fontWeight: theme.typography.fontWeightBold,
   },
 }))(Button);
 
-export default function Header({landing}: {landing?: boolean}) {
-    const classes = useStyles()
-    const user = useContext(FirebaseContext)
+interface HeaderProps {
+  page: string
+  bgColor: AppBarProps["color"]
+}
+
+export default function Header({ bgColor, page }: HeaderProps) {
+  const classes = useStyles()
+  const firebase = useFirebase()
 
   return (
     <>
-    <AppBar position="static" elevation={0} color={landing ? 'transparent' : 'secondary'}>
+    <AppBar position="static" elevation={0} color={bgColor}>
       <Container maxWidth='lg' disableGutters>
         <Toolbar>
-          <Link
-            to={ROUTES.LANDING}
-            underline="none"
-          >
+          <Link to={ROUTES.LANDING} underline="none">
             <Box display='flex' alignItems='center'>
               <LogoIcon viewBox='0 0 40 40' />
               <Typography
                 variant='h4'
                 className={classes.brandName}
-                style={{color: landing ? grey['200'] : 'primary'}}
+                style={{color: grey['100']}}
               >
                 <strong>LeanUrls</strong>
               </Typography>
@@ -76,34 +71,67 @@ export default function Header({landing}: {landing?: boolean}) {
             alignItems="center"
             flexGrow={1}
           >
-            {user
-              ? <Link
-                  underline="none"
-                  variant="subtitle1"
-                  color="inherit"
-                  to={ROUTES.DASHBOARD}
-                  className={classes.link}
-                >
-                  Dashboard
-                </Link>
-              : (<>
+            {isLoggedIn()
+              ? page === 'dashboard'
+                ?
+                  <>
+                  <StyledButton
+                    disableElevation
+                    onClick={() => {}}
+                    className={classes.button}
+                  >
+                    Shorten Link
+                  </StyledButton>
                     <StyledButton
                       disableElevation
-                      color="primary"
-                      variant="contained"
-                      style={{ marginLeft: 16 }}
-                      onClick={() => navigate(ROUTES.SIGNUP)}
-                    >
-                      Sign up
-                    </StyledButton>
-                    <StyledButton
-                      disableElevation
-                      onClick={() => navigate(ROUTES.LOGIN)}
+                      onClick={() => (logout(() => {
+                        firebase.doSignOut()
+                        navigate(ROUTES.LANDING)
+                      }))}
                       className={classes.button}
                     >
-                      Login
+                      Log out
                     </StyledButton>
                   </>
+                :
+                <>
+                  <Link
+                    underline="none"
+                    variant="subtitle1"
+                    to={ROUTES.DASHBOARD}
+                  >
+                    <Avatar alt={`user name`} src={`u`} />
+                  </Link>
+                  <StyledButton
+                    disableElevation
+                    onClick={() => (logout(() => {
+                      firebase.doSignOut()
+                      navigate(ROUTES.LANDING)
+                    }))}
+                    className={classes.button}
+                  >
+                    Log out
+                  </StyledButton>
+                </>
+              : (
+                <>
+                  <StyledButton
+                    disableElevation
+                    color="primary"
+                    variant="contained"
+                    style={{ marginLeft: 16 }}
+                    onClick={() => navigate(ROUTES.SIGNUP)}
+                  >
+                    Sign up
+                  </StyledButton>
+                  <StyledButton
+                    disableElevation
+                    onClick={() => navigate(ROUTES.LOGIN)}
+                    className={classes.button}
+                  >
+                    Login
+                  </StyledButton>
+                </>
               )}
           </Box>
         </Toolbar>

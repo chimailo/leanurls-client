@@ -5,16 +5,15 @@ import { createStyles, Theme, makeStyles} from '@material-ui/core/styles';
 import {grey } from '@material-ui/core/colors'
 import * as ROUTES from "../lib/routes"
 import Link from "./Link"
-import {bg} from '../lib/constants'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      backgroundImage: bg,
-      borderTop: `1px solid ${grey[400]}`,
+      backgroundColor:'rgba(0, 0, 0, 0.1)',
       display: "flex",
-      padding: theme.spacing(2),
       justifyContent: "center",
+      color: theme.palette.grey[300],
+      padding: theme.spacing(1, 2),
     },
   })
 )
@@ -29,13 +28,14 @@ const QUERY = graphql`
   }
 `
 
-export default function Footer() {
+export default function Footer({page}: {page: string}) {
   const { site } = useStaticQuery(QUERY)
   const classes = useStyles()
+  console.log(page)
 
   return (
     <div className={classes.root}>
-      <Typography style={{ color: grey[200] }}>
+      <Typography color={page === 'dashboard' ? 'secondary' : 'inherit'}>
         <Link underline="none" color="inherit" to={ROUTES.TERMS}>
           <small>Terms</small>{" "}
         </Link>

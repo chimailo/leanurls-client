@@ -1,12 +1,29 @@
 import React, { Fragment, useEffect, useState } from "react"
-import { Box, CssBaseline } from "@material-ui/core"
-import { ThemeProvider } from "@material-ui/core/styles"
+import { Box, CssBaseline, AppBarProps } from "@material-ui/core"
+import { createStyles, makeStyles, Theme, ThemeProvider } from "@material-ui/core/styles"
 
-import Footer from "./footer"
-import Head from "./head"
+import Footer from "./Footer"
+import Head from "./Head"
 import useFirebase from '../useFirebase';
 import { FirebaseContext } from "../services/firebase"
 import { theme } from "../lib/theme"
+import Header from "./Header"
+import { bg } from "../lib/constants"
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    box: {
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundImage: (props: LayoutProps) => props.headerProps ? 'unset' : bg,
+      backgroundColor: (props: LayoutProps) =>
+        (props.headerProps && props.headerProps.page === 'dashboard')
+          ? theme.palette.background.default
+          : 'unset',
+    },
+  })
+)
 
 interface LayoutProps {
   title: string
@@ -14,32 +31,40 @@ interface LayoutProps {
   description?: string
   image?: string
   children: React.ReactNode
+  headerProps?: {
+    bgColor: AppBarProps["color"],
+    page: string
+  }
 }
 
 export default function Layout(props: LayoutProps) {
-  const [user, setUser] = useState<typeof firebase.user>(null)
-  const firebase = useFirebase();
-  const { children } = props
+  const classes = useStyles(props)
+  // const [user, setUser] = useState<typeof firebase.user>(null)
+  // const firebase = useFirebase();
+  const { children, headerProps} = props
+  const page = headerProps ? headerProps.page : ''
+  const bgColor = headerProps ? headerProps.bgColor : 'transparent'
 
-  useEffect(() => {
-    if (!firebase) return;
+  // useEffect(() => {
+  //   if (!firebase) return;
 
-    return firebase.auth.onAuthStateChanged(user => setUser(user));
-  }, [firebase]);
+  //   return firebase.auth.onAuthStateChanged(user => setUser(user));
+  // }, [firebase]);
 
   return (
     <Fragment>
       <Head {...props} />
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box display="flex" flexDirection="column" minHeight="100vh">
-          <Box flexGrow={1} display='flex'>
-            <FirebaseContext.Provider value={user}>
+        <div className={classes.box}>
+          <Box flexGrow={1}>
+            {/* <FirebaseContext.Provider value={user}> */}
+              <Header bgColor={bgColor} page={page} />
               {children}
-            </FirebaseContext.Provider>
+            {/* </FirebaseContext.Provider> */}
           </Box>
-          <Footer />
-        </Box>
+          <Footer page={`dashboard`} />
+        </div>
       </ThemeProvider>
     </Fragment>
   )

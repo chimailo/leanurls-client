@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik } from "formik";
+import { navigate } from "gatsby-link";
 import { Paper, Typography, Grid } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import {Alert, AlertTitle} from '@material-ui/lab';
 import Header from '../Header'
 import Link from '../Link'
 import Layout from '../Layout'
@@ -9,6 +11,7 @@ import LoginForm from '../forms/Login'
 import useFirebase from "../../useFirebase";
 import * as ROUTES from "../../lib/routes"
 import { bg } from "../../lib/constants";
+import { isLoggedIn, setToken } from "../../lib/auth";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,31 +29,29 @@ const useStyles = makeStyles((theme: Theme) =>
         margin: theme.spacing(4, 'auto'),
       },
     },
-    form: {
-      margin: 'auto',
-      maxWidth: 400,
-    },
-    field: {
-      marginTop: theme.spacing(3),
-    },
-    button: {
-      borderRadius: 8,
-      fontSize: '1rem',
-      textTransform: 'capitalize',
-      marginTop: theme.spacing(4),
-      fontWeight: theme.typography.fontWeightBold,
-    },
   })
 );
 
+export interface AlertProps {
+  message: string
+  severity: 'error' | 'success' | 'info' | 'warning';
+}
+
 export default function Login() {
+  const [alert, setAlert] = useState<AlertProps>(null)
+  const [isAuth, setAuth] = useState(isLoggedIn())
   const classes = useStyles()
   const firebase = useFirebase()
 
+  useEffect(() => {
+    if (isAuth) {
+      navigate(ROUTES.DASHBOARD)
+    }
+  }, [isAuth])
+
   return (
     <Layout title='Login'>
-    <div className={classes.root}>
-      <Header landing />
+      <div className={classes.root}>
         <Grid
           container
           alignItems='center'
@@ -68,16 +69,25 @@ export default function Login() {
               >
                 Log in to your account.
               </Typography>
-          {/* <LoginForm /> */}
+              {alert && <Alert severity={alert.severity} onClose={() => setAlert(null)}>
+                <AlertTitle>{alert.severity}</AlertTitle>
+                {alert.message}
+              </Alert>}
               <Formik
                 initialValues={{
                     email: '',
                     password: '',
                 }}
                 onSubmit={async ({email, password}) => {
-                    try {
-                    firebase.doSignInWithEmailAndPassword(email, password)
-                    } catch (error) {}
+                  try {
+                    const {user} = await firebase.doSignInWithEmailAndPassword(email, password)
+                    const token = await user.getIdToken()
+                    setToken(token)
+                    setAuth(true)
+                  } catch (error) {
+                    console.log(error)
+                    setAlert({ message: error.message, severity: 'error' })
+                  }
                 }}
               >
                 {(props) => <LoginForm formik={props} />}

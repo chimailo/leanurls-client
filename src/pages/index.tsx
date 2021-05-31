@@ -7,18 +7,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { Button, Container, Grid, Hidden, Typography } from "@material-ui/core"
 import { createStyles, Theme, makeStyles, withStyles } from '@material-ui/core/styles';
 import DoneIcon from '@material-ui/icons/Done';
-import Header from '../components/Header';
 import Layout from '../components/Layout';
 import UrlForm from '../components/forms/urlForm'
 import * as ROUTES from "../lib/routes"
-import { bg } from '../lib/constants'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    wrapper: {
-      flexGrow: 1,
-      backgroundImage: bg,
-    },
     container: {
       paddingTop: theme.spacing(5),
       paddingBottom: theme.spacing(5),
@@ -50,39 +44,36 @@ export default function Home() {
 
   return (
     <Layout title='Home'>
-      <div className={classes.wrapper}>
-        <Header landing />
-        <Container maxWidth='lg' className={classes.container}>
-          <Grid container>
-            <Hidden xsDown>
-              <Grid item xs={12} sm={6}>
-                <Typography variant='h3' component='h1' paragraph className={classes.textColor}>
-                  <strong>Same link destination, shorter url</strong>
-                </Typography>
-                <Typography
-                  variant='subtitle1'
-                  className={classes.textColor}
-                  style={{ fontSize: '1.15rem' }}
-                >
-                  LeanUrls is a service that transforms your urls into a short and concise form. Create a free account to enjoy:
-                </Typography>
-                <Features features={features} />
-                <StyledButton
-                  size='large'
-                  color='secondary'
-                  variant='contained'
-                  onClick={() => navigate(ROUTES.SIGNUP)}
-                >
-                  create free account
-                </StyledButton>
-              </Grid>
-            </Hidden>
-            <Grid item xs={12} sm={6}>
-              <UrlForm />
+      <Container maxWidth='lg' className={classes.container}>
+        <Grid container>
+          <Hidden xsDown>
+            <Grid item xs={12} sm={6} style={{ paddingRight: '1rem' }}>
+              <Typography variant='h3' component='h1' paragraph className={classes.textColor}>
+                <strong>Same link destination, shorter url</strong>
+              </Typography>
+              <Typography
+                variant='subtitle1'
+                className={classes.textColor}
+                style={{ fontSize: '1.15rem' }}
+              >
+                LeanUrls is a service that transforms your urls into a short and concise form. Create a free account to enjoy:
+              </Typography>
+              <Features features={features} />
+              <StyledButton
+                size='large'
+                color='secondary'
+                variant='contained'
+                onClick={() => navigate(ROUTES.SIGNUP)}
+              >
+                create free account
+              </StyledButton>
             </Grid>
+          </Hidden>
+          <Grid item xs={12} sm={6}>
+            <UrlForm />
           </Grid>
-        </Container>
-      </div>
+        </Grid>
+      </Container>
     </Layout>
   )
 }

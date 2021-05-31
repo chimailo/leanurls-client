@@ -1,11 +1,12 @@
-import React from 'react';
-import { FormikProps } from 'formik';
-import { Button, TextField } from '@material-ui/core';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-} from '@material-ui/core/styles';
+import React, { useEffect } from 'react';
+import { navigate } from 'gatsby';
+import { AppBarProps, Box, Button, TextField } from '@material-ui/core';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import Footer from '../Footer';
+import Header from '../Header';
+import Layout from '../Layout';
+import { isLoggedIn } from '../../lib/auth';
+import * as ROUTES from '../../lib/routes'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -19,46 +20,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function LoginForm({formik}: {formik: FormikProps<{
-  email: string;
-  password: string;
-}>}) {
+export default function Dashboard() {
   const classes = useStyles();
-  const {values, isSubmitting, handleChange, handleBlur, handleSubmit} = formik
-
+  const headerProps = {
+    page: 'dashboard',
+    bgColor: 'secondary' as AppBarProps["color"]
+  }
+  
   return (
-          <form onSubmit={handleSubmit}>
-            <TextField
-              name='email'
-              label='Email'
-              type='text'
-              className={classes.field}
-              value={values.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              fullWidth
-            />
-            <TextField
-              name='password'
-              label='Password'
-              type='password'
-              className={classes.field}
-              value={values.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              fullWidth
-            />
-            <Button
-              type='submit'
-              color='primary'
-              variant='contained'
-              className={classes.button}
-              disableElevation
-              fullWidth
-              disabled={isSubmitting}
-            >
-              Login
-            </Button>
-          </form>
+    <Layout title='Dashboard' headerProps={headerProps}>
+        <div className="">Dashboard</div>
+    </Layout>
   );
 }
