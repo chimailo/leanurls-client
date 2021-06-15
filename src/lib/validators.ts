@@ -22,24 +22,18 @@ export const validatePasswordConfirm = () =>
     .nullable()
     .oneOf([Yup.ref('password'), null], 'Both password fields must match');
 
-// export const validateUsername = () =>
-//   Yup.string()
-//     .max(32, 'Must be 32 characters or less')
-//     .min(3, 'Must be 3 characters or more')
-//     .matches(/^[a-zA-Z0-9_]*$/, {
-//       message: 'Must contain only valid characters (a-z, A-Z, 0-9, and _)',
-//       excludeEmptyString: true,
-//     })
-//     .required('Username is required')
-//     .test({
-//       name: 'uniqueUsername',
-//       exclusive: true,
-//       message: 'A user with that username already exists',
-//       test: async (value) => {
-//         const res = await axios.post(
-//           `${process.env.REACT_APP_API_URL}/profile/check-username`,
-//           { username: value }
-//         );
-//         return res.data.res;
-//       },
-//     });
+export const validateAlias = () =>
+  Yup.string()
+    .max(32, 'Must be 32 characters or less')
+    .min(3, 'Must be 3 characters or more')
+    .matches(/^[a-zA-Z0-9_-]*$/, {
+      message: 'Must contain only valid characters (a-z, A-Z, 0-9, -, and _)',
+      excludeEmptyString: true,
+    })
+
+export const validateLink = () =>
+  Yup.string()
+    .matches(/^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?$/, {
+      message: 'Invalid url format',
+      excludeEmptyString: true,
+    })

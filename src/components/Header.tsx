@@ -1,5 +1,5 @@
-import React, { useContext } from "react"
-import { navigate } from "gatsby"
+import React, { useState } from "react"
+import { useRouter } from 'next/router'
 import AppBar, { AppBarProps } from "@material-ui/core/AppBar"
 import Avatar from "@material-ui/core/Avatar"
 import Box from "@material-ui/core/Box"
@@ -11,10 +11,12 @@ import { createStyles, makeStyles, Theme, withStyles } from "@material-ui/core/s
 import { grey } from '@material-ui/core/colors/'
 
 import Link from "./Link"
-import useFirebase from '../useFirebase'
-import { isLoggedIn, logout } from "../lib/auth"
+import firebase from '../lib/firebase'
 import { LogoIcon } from './svg'
+import { isLoggedIn, logout } from "../lib/auth"
+import { MeQuery } from "../generated/graphql"
 import * as ROUTES from "../lib/routes"
+import NewLinkModal from "./NewLink"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,19 +42,25 @@ const StyledButton = withStyles((theme: Theme) => ({
 
 interface HeaderProps {
   page: string
+  user?: MeQuery['me']
   bgColor: AppBarProps["color"]
 }
 
-export default function Header({ bgColor, page }: HeaderProps) {
+export default function Header({ bgColor, page, user }: HeaderProps) {
+  const [openModal, setModal] = useState(false)
   const classes = useStyles()
-  const firebase = useFirebase()
+  const router = useRouter()
+
+  const onLogout = () => {
+    firebase.auth().signOut()
+    router.push(ROUTES.LANDING)
+  }
 
   return (
-    <>
     <AppBar position="static" elevation={0} color={bgColor}>
       <Container maxWidth='lg' disableGutters>
         <Toolbar>
-          <Link to={ROUTES.LANDING} underline="none">
+          <Link href={ROUTES.LANDING} underline="none">
             <Box display='flex' alignItems='center'>
               <LogoIcon viewBox='0 0 40 40' />
               <Typography
@@ -75,19 +83,17 @@ export default function Header({ bgColor, page }: HeaderProps) {
               ? page === 'dashboard'
                 ?
                   <>
-                  <StyledButton
-                    disableElevation
-                    onClick={() => {}}
-                    className={classes.button}
-                  >
-                    Shorten Link
-                  </StyledButton>
                     <StyledButton
                       disableElevation
-                      onClick={() => (logout(() => {
-                        firebase.doSignOut()
-                        navigate(ROUTES.LANDING)
-                      }))}
+                      color='default'
+                      onClick={() => setModal(true)}
+                      className={classes.button}
+                    >
+                      New Link
+                    </StyledButton>
+                    <StyledButton
+                      disableElevation
+                      onClick={() => (logout(onLogout))}
                       className={classes.button}
                     >
                       Log out
@@ -98,16 +104,13 @@ export default function Header({ bgColor, page }: HeaderProps) {
                   <Link
                     underline="none"
                     variant="subtitle1"
-                    to={ROUTES.DASHBOARD}
+                    href={ROUTES.DASHBOARD}
                   >
-                    <Avatar alt={`user name`} src={`u`} />
+                    <Avatar alt={user?.name} src={user?.avatar} />
                   </Link>
                   <StyledButton
                     disableElevation
-                    onClick={() => (logout(() => {
-                      firebase.doSignOut()
-                      navigate(ROUTES.LANDING)
-                    }))}
+                    onClick={() => (logout(onLogout))}
                     className={classes.button}
                   >
                     Log out
@@ -120,13 +123,13 @@ export default function Header({ bgColor, page }: HeaderProps) {
                     color="primary"
                     variant="contained"
                     style={{ marginLeft: 16 }}
-                    onClick={() => navigate(ROUTES.SIGNUP)}
+                    onClick={() => router.push(ROUTES.SIGNUP)}
                   >
                     Sign up
                   </StyledButton>
                   <StyledButton
                     disableElevation
-                    onClick={() => navigate(ROUTES.LOGIN)}
+                    onClick={() => router.push(ROUTES.LOGIN)}
                     className={classes.button}
                   >
                     Login
@@ -135,8 +138,8 @@ export default function Header({ bgColor, page }: HeaderProps) {
               )}
           </Box>
         </Toolbar>
-          </Container>
-      </AppBar>
-    </>
+      </Container>
+      <NewLinkModal isOpen={openModal} handleClose={() => setModal(false)} />
+    </AppBar>
   )
 }
