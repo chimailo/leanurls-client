@@ -66,7 +66,7 @@ export default function UserPhoto(props: UserPhotoProps) {
   const handleSave = async () => {
     try {
       if (imgFile) {
-        const username = user.email.split('@')[0];
+        const username = user.email!.split('@')[0];
         const listRef = storageRef.child(username);
         const imgList = await listRef.listAll();
         imgList.items.map((item) => item.delete());
@@ -128,6 +128,7 @@ export default function UserPhoto(props: UserPhotoProps) {
               >
                 <Avatar
                   alt={imgFile?.name}
+                  // @ts-expect-error
                   src={img ? img : user.photoURL}
                   className={classes.avatar}
                 />

@@ -265,66 +265,75 @@ export default function Settings() {
           <CircularLoading size={40} />
         </Box>
       ) : (
-        <Container maxWidth='md' classes={{ maxWidthMd: classes.container }}>
-          <Snackbar
-            open={!!alert}
-            autoHideDuration={6000}
-            onClose={handleAlertClose}
-            TransitionComponent={Slide}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert
-              onClose={handleAlertClose}
-              elevation={6}
-              variant='filled'
-              severity={alert?.severity}
+        <>
+          {user && (
+            <Container
+              maxWidth='md'
+              classes={{ maxWidthMd: classes.container }}
             >
-              {alert?.message}
-            </Alert>
-          </Snackbar>
-          <UserInput
-            user={user}
-            title='Your Name'
-            classes={classes}
-            value={name ? name : (user?.displayName as string)}
-            err={err?.name}
-            editing={isEditing === 'name'}
-            handleEdit={handleNameEdit}
-            handleBlur={() => isNameValid(name)}
-            handleChange={handleNameChange}
-            handleCancel={handleCancel}
-            handleSave={handleSaveName}
-          />
-          <UserPhoto user={user} classes={classes} />
-          <UserInput
-            user={user}
-            title='Email'
-            classes={classes}
-            value={email ? email : (user?.email as string)}
-            err={err?.email}
-            editing={isEditing === 'email'}
-            handleEditing={handleEditing}
-            handleBlur={() => isEmailValid(email)}
-            handleChange={handleEmailChange}
-            handleCancel={handleCancel}
-            handleSave={handleSaveEmail}
-          />
-          <PasswordInput
-            title='Password'
-            classes={classes}
-            values={{ password, password2 }}
-            err={{ password: err?.password, password2: err?.password2 }}
-            handleEditing={handleEditing}
-            editing={isEditing === 'password'}
-            handleCancel={handleCancel}
-            handleSave={handleSavePassword}
-            handlePasswordBlur={() => isPasswordValid(password)}
-            handlePassword2Blur={() => isPassword2Valid(password2)}
-            handlePasswordChange={handlePasswordChange}
-            handlePassword2Change={handlePassword2Change}
-          />
-          <DeleteAccount classes={classes} />
-        </Container>
+              <Snackbar
+                open={!!alert}
+                autoHideDuration={6000}
+                onClose={handleAlertClose}
+                TransitionComponent={Slide}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              >
+                <Alert
+                  onClose={handleAlertClose}
+                  elevation={6}
+                  variant='filled'
+                  severity={alert?.severity}
+                >
+                  {alert?.message}
+                </Alert>
+              </Snackbar>
+              <UserInput
+                user={user}
+                title='Your Name'
+                classes={classes}
+                value={name ? name : (user?.displayName as string)}
+                err={err?.name}
+                editing={isEditing === 'name'}
+                handleEdit={handleNameEdit}
+                handleEditing={() => {}}
+                handleBlur={() => isNameValid(name)}
+                handleChange={handleNameChange}
+                handleCancel={handleCancel}
+                handleSave={handleSaveName}
+              />
+              <UserPhoto user={user} classes={classes} />
+              <UserInput
+                user={user}
+                title='Email'
+                classes={classes}
+                value={email ? email : (user?.email as string)}
+                err={err?.email}
+                editing={isEditing === 'email'}
+                handleEdit={() => {}}
+                handleEditing={handleEditing}
+                handleBlur={() => isEmailValid(email)}
+                handleChange={handleEmailChange}
+                handleCancel={handleCancel}
+                handleSave={handleSaveEmail}
+              />
+              <PasswordInput
+                title='Password'
+                classes={classes}
+                values={{ password, password2 }}
+                err={{ password: err?.password, password2: err?.password2 }}
+                handleEditing={handleEditing}
+                editing={isEditing === 'password'}
+                handleCancel={handleCancel}
+                handleSave={handleSavePassword}
+                handlePasswordBlur={() => isPasswordValid(password)}
+                handlePassword2Blur={() => isPassword2Valid(password2)}
+                handlePasswordChange={handlePasswordChange}
+                handlePassword2Change={handlePassword2Change}
+              />
+              <DeleteAccount classes={classes} />
+            </Container>
+          )}
+        </>
       )}
     </Wrapper>
   );

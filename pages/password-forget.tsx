@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Formik } from 'formik';
@@ -11,11 +11,11 @@ import firebase from '../src/lib/firebase';
 import Link from '../src/components/Link';
 import PasswordForget from '../src/components/forms/PasswordForget';
 import Wrapper from '../src/components/Wrapper';
-import { AlertProps } from '../types';
 import { bg } from '../src/lib/constants';
-import { isLoggedIn } from '../src/lib/utils';
+import { getToken } from '../src/lib/utils';
 import { validateEmail } from '../src/lib/validators';
 import * as ROUTES from '../src/lib/routes';
+import { useUser } from '../src/lib/hooks';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -37,20 +37,23 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function Login() {
-  const [alert, setAlert] = useState<AlertProps | null>(null);
+  // const [alert, setAlert] = useState<AlertProps | null>(null);
   const classes = useStyles();
   const router = useRouter();
+  const { isAuthenticated, user } = useUser();
 
-  if (isLoggedIn()) {
-    router.replace(ROUTES.DASHBOARD);
-  }
+  useEffect(() => {
+    if (getToken() && isAuthenticated && !user?.isAnonymous) {
+      router.replace(ROUTES.DASHBOARD);
+    }
+  }, [getToken, isAuthenticated, user]);
 
   return (
     <React.Fragment>
       <Head>
         <title>Reset Password | LeanUrls</title>
       </Head>
-      <Wrapper>
+      <Wrapper page='forget'>
         <div className={classes.root}>
           <Grid
             container
@@ -69,7 +72,7 @@ export default function Login() {
                 >
                   Reset your password.
                 </Typography>
-                {alert && (
+                {/* {alert && (
                   <Alert
                     severity={alert.severity}
                     onClose={() => setAlert(null)}
@@ -77,18 +80,19 @@ export default function Login() {
                     <AlertTitle>{alert.severity}</AlertTitle>
                     {alert.message}
                   </Alert>
-                )}
+                )} */}
                 <Formik
                   initialValues={{ email: '' }}
                   validateOnChange={false}
                   validationSchema={Yup.object({ email: validateEmail() })}
                   onSubmit={async ({ email }) => {
                     try {
-                      await firebase.auth().sendPasswordResetEmail(email);
+                      await firebase.auth().sendPasswordResetEmail(email, {
+                        url: `${process.env
+                          .NEXT_PUBLIC_HOST_URL!}?email=${email}`,
+                      });
                     } catch (error) {
                       console.log('error: ', error);
-                      error &&
-                        setAlert({ message: error.message, severity: 'error' });
                     }
                   }}
                 >

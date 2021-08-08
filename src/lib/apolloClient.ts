@@ -5,15 +5,16 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
 } from '@apollo/client';
+import { offsetLimitPagination } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import { setContext } from '@apollo/client/link/context';
 // import { concatPagination } from '@apollo/client/utilities'
 import merge from 'ts-deepmerge';
+// @ts-ignore
 import isEqual from 'lodash/isEqual';
 import firebase from './firebase';
 import { getToken, setToken } from './utils';
-import { offsetLimitPagination } from '@apollo/client/utilities';
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__';
 

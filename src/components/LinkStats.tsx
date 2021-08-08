@@ -58,7 +58,7 @@ export default function LinkStats({
                 ' '
               )[0]}
         </Typography>
-        {!data.getMyLastHitTime && (
+        {data.getMyLastHitTime && (
           <Typography color='textSecondary' className={classes.text}>
             Last hit{' '}
             {`(${

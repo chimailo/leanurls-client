@@ -25,6 +25,7 @@ export function createData(
 export const getRows = (items: TableDataQuery["getTableData"]) =>
   items.map(item => {
     const { id, alias, link, numberOfHits, createdAt, lastHit } = item
+    // @ts-expect-error
     return createData(id, alias, link, numberOfHits, createdAt, lastHit)
   })
 
