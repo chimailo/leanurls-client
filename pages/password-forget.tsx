@@ -1,20 +1,21 @@
-import React, { useState } from "react";
-import Head from "next/head";
-import { useRouter } from 'next/router'
-import { Formik } from "formik";
-import * as Yup from 'yup'
-import { Paper, Typography, Grid } from "@material-ui/core";
+import React, { useState } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { Paper, Typography, Grid } from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
-import firebase from "../src/lib/firebase";
-import Link from '../src/components/Link'
-import PasswordForget from "../src/components/forms/PasswordForget";
-import Wrapper from '../src/components/Wrapper'
-import { bg } from "../src/lib/constants";
-import { isLoggedIn } from "../src/lib/auth";
-import { validateEmail } from '../src/lib/validators'
-import * as ROUTES from "../src/lib/routes"
+import firebase from '../src/lib/firebase';
+import Link from '../src/components/Link';
+import PasswordForget from '../src/components/forms/PasswordForget';
+import Wrapper from '../src/components/Wrapper';
+import { AlertProps } from '../types';
+import { bg } from '../src/lib/constants';
+import { isLoggedIn } from '../src/lib/utils';
+import { validateEmail } from '../src/lib/validators';
+import * as ROUTES from '../src/lib/routes';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,18 +36,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export interface AlertProps {
-  message: string
-  severity: 'error' | 'success' | 'info' | 'warning';
-}
-
 export default function Login() {
-  const [alert, setAlert] = useState<AlertProps | null>(null)
-  const classes = useStyles()
-  const router = useRouter()
+  const [alert, setAlert] = useState<AlertProps | null>(null);
+  const classes = useStyles();
+  const router = useRouter();
 
   if (isLoggedIn()) {
-    router.replace(ROUTES.DASHBOARD)
+    router.replace(ROUTES.DASHBOARD);
   }
 
   return (
@@ -68,31 +64,41 @@ export default function Login() {
                   component='h4'
                   variant='h6'
                   align='center'
-                  noWrap 
+                  noWrap
                   style={{ marginTop: 40 }}
                 >
                   Reset your password.
                 </Typography>
-                {alert && <Alert severity={alert.severity} onClose={() => setAlert(null)}>
-                  <AlertTitle>{alert.severity}</AlertTitle>
-                  {alert.message}
-                </Alert>}
+                {alert && (
+                  <Alert
+                    severity={alert.severity}
+                    onClose={() => setAlert(null)}
+                  >
+                    <AlertTitle>{alert.severity}</AlertTitle>
+                    {alert.message}
+                  </Alert>
+                )}
                 <Formik
                   initialValues={{ email: '' }}
                   validateOnChange={false}
                   validationSchema={Yup.object({ email: validateEmail() })}
                   onSubmit={async ({ email }) => {
                     try {
-                      await firebase.auth().sendPasswordResetEmail(email)
+                      await firebase.auth().sendPasswordResetEmail(email);
                     } catch (error) {
-                      console.log('error: ', error)
-                      error && setAlert({ message: error.message, severity: 'error' })
+                      console.log('error: ', error);
+                      error &&
+                        setAlert({ message: error.message, severity: 'error' });
                     }
                   }}
                 >
                   {(props) => <PasswordForget formik={props} />}
                 </Formik>
-                <Typography gutterBottom variant='body2' style={{ marginTop: '2rem' }}>
+                <Typography
+                  gutterBottom
+                  variant='body2'
+                  style={{ marginTop: '2rem' }}
+                >
                   <Link href={ROUTES.LOGIN} color='primary'>
                     Go back to login
                   </Link>
@@ -103,5 +109,5 @@ export default function Login() {
         </div>
       </Wrapper>
     </React.Fragment>
-  )
+  );
 }

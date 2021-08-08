@@ -1,21 +1,28 @@
-import React, { useEffect, useState } from "react";
-import Head from 'next/head'
-import { useRouter } from "next/router";
-import * as Yup from 'yup'
-import { Formik } from "formik";
-import { Paper, Typography, Grid } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { Formik } from 'formik';
+import { useRouter } from 'next/router';
+import * as Yup from 'yup';
+import { Paper, Typography, Grid } from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import {Alert, AlertTitle} from '@material-ui/lab';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
-import firebase from "../src/lib/firebase";
-import Link from '../src/components/Link'
-import Wrapper from '../src/components/Wrapper'
-import SignupForm from '../src/components/forms/Signup'
-import * as ROUTES from "../src/lib/routes"
-import { bg } from "../src/lib/constants";
-import { isLoggedIn, setToken } from "../src/lib/auth";
-import { validateName, validateEmail, validatePassword, validatePasswordConfirm } from '../src/lib/validators'
-import { useCreateUserMutation } from "../src/generated/graphql";
+import CircularLoading from '../src/components/Loading';
+import firebase from '../src/lib/firebase';
+import Link from '../src/components/Link';
+import SignupForm from '../src/components/forms/Signup';
+import Wrapper from '../src/components/Wrapper';
+import * as ROUTES from '../src/lib/routes';
+import { bg } from '../src/lib/constants';
+import { getToken, setToken } from '../src/lib/utils';
+import { useCreateUserMutation } from '../src/generated/graphql';
+import { useUser } from '../src/lib/hooks';
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  validatePasswordConfirm,
+} from '../src/lib/validators';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,22 +40,44 @@ const useStyles = makeStyles((theme: Theme) =>
         margin: theme.spacing(4, 'auto'),
       },
     },
+    loading: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100vh',
+    },
   })
 );
 
-export interface AlertProps {
-  message: string
-  severity: 'error' | 'success' | 'info' | 'warning';
+interface AuthError {
+  code: string;
+  message: string;
 }
 
 export default function Signup() {
-  const [alert, setAlert] = useState<AlertProps | null>(null)
-  const [createUser] = useCreateUserMutation()
+  const [error, setError] = useState<AuthError>();
+  const [alert, setAlert] = useState(false);
+  const [createUser, { data, loading }] = useCreateUserMutation();
   const classes = useStyles();
-  const router = useRouter()
+  const router = useRouter();
+  const { user } = useUser();
 
-  if (isLoggedIn()) {
-    router.replace(ROUTES.DASHBOARD)
+  useEffect(() => {
+    if (user && !loading && data) {
+      user.updateProfile({
+        displayName: data.createUser?.name,
+        photoURL: data.createUser?.avatar,
+      });
+      router.replace(ROUTES.DASHBOARD);
+    }
+  }, [loading, data, user]);
+
+  if (loading) {
+    return (
+      <div className={classes.loading}>
+        <CircularLoading size={40} />
+      </div>
+    );
   }
 
   return (
@@ -56,7 +85,7 @@ export default function Signup() {
       <Head>
         <title>Sign up | LeanUrls</title>
       </Head>
-      <Wrapper>
+      <Wrapper page='signup'>
         <Grid container alignItems='center' justify='center'>
           <Grid item xs={12} sm={8} md={6} component='main'>
             <Paper color='primary' elevation={0} className={classes.paper}>
@@ -64,21 +93,23 @@ export default function Signup() {
                 component='h4'
                 variant='h6'
                 align='center'
-                noWrap 
+                noWrap
                 style={{ marginTop: 40 }}
               >
                 Create your account.
               </Typography>
-              {alert && <Alert severity={alert.severity} onClose={() => setAlert(null)}>
-                <AlertTitle>{alert.severity}</AlertTitle>
-                {alert.message}
-              </Alert>}
+              {alert && (
+                <Alert severity='error' onClose={() => setAlert(false)}>
+                  <AlertTitle>{error?.code}</AlertTitle>
+                  {error?.message}
+                </Alert>
+              )}
               <Formik
                 initialValues={{
-                    name: '',
-                    email: '',
-                    password: '',
-                    password2: '',
+                  name: '',
+                  email: '',
+                  password: 'password',
+                  password2: 'password',
                 }}
                 validateOnChange={false}
                 validationSchema={Yup.object({
@@ -87,20 +118,37 @@ export default function Signup() {
                   password: validatePassword(),
                   password2: validatePasswordConfirm(),
                 })}
-                onSubmit={async ({name, email, password}) => {
+                onSubmit={async ({ name, email, password }) => {
                   try {
-                    const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password)
-                    console.log('creating user')
-                    if (user) {
-                      setToken(await user.getIdToken())
+                    let authUser;
+
+                    if (getToken()) {
+                      const credential =
+                        firebase.auth.EmailAuthProvider.credential(
+                          email,
+                          password
+                        );
+                      authUser = await firebase
+                        .auth()
+                        .currentUser?.linkWithCredential(credential);
+                    } else {
+                      authUser = await firebase
+                        .auth()
+                        .createUserWithEmailAndPassword(email, password);
+                    }
+
+                    if (authUser && authUser?.user) {
+                      setToken(await authUser.user.getIdToken());
                       await createUser({
                         variables: { name, email },
-                      })
+                      });
                     }
-                    console.log('creating user... done')
                   } catch (err) {
-                    console.log(err)
-                    if (err) setAlert({ message: err?.message, severity: 'error' })
+                    setError({
+                      code: 'Error',
+                      message: err.message,
+                    });
+                    setAlert(true);
                   }
                 }}
               >
@@ -127,5 +175,5 @@ export default function Signup() {
         </Grid>
       </Wrapper>
     </React.Fragment>
-  )
+  );
 }

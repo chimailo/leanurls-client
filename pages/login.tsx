@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
-import Head from "next/head";
-import { useRouter } from 'next/router'
-import { Formik } from "formik";
-import { Paper, Typography, Grid } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { ApolloError } from '@apollo/client';
+import { Formik } from 'formik';
+import { useRouter } from 'next/router';
+import { Paper, Typography, Grid } from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import {Alert, AlertTitle} from '@material-ui/lab';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
-import Link from '../src/components/Link'
-import Wrapper from '../src/components/Wrapper'
-import LoginForm from '../src/components/forms/Login'
-import firebase from "../src/lib/firebase";
-import * as ROUTES from "../src/lib/routes"
-import { bg } from "../src/lib/constants";
-import { isLoggedIn } from "../src/lib/auth";
-import { useUser } from "../src/lib/hooks";
-import { useMeLazyQuery } from "../src/generated/graphql";
+import Link from '../src/components/Link';
+import Wrapper from '../src/components/Wrapper';
+import LoginForm from '../src/components/forms/Login';
+import firebase from '../src/lib/firebase';
+import { bg } from '../src/lib/constants';
+import { getToken } from '../src/lib/utils';
+import { useUser } from '../src/lib/hooks';
+import * as ROUTES from '../src/lib/routes';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,26 +35,30 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export interface AlertProps {
-  message: string
-  severity: 'error' | 'success' | 'info' | 'warning';
+interface AuthError {
+  code: string;
+  message: string;
 }
 
 export default function Login() {
-  const [alert, setAlert] = useState<AlertProps | null>(null)
-  const classes = useStyles()
-  const router = useRouter()
+  const [error, setError] = useState<AuthError | null>(null);
+  const [alert, setAlert] = useState(false);
+  const classes = useStyles();
+  const router = useRouter();
+  const { isAuthenticated, user } = useUser();
 
-  if (isLoggedIn()) {
-    router.replace(ROUTES.DASHBOARD)
-  }
+  useEffect(() => {
+    if (getToken() && isAuthenticated && !user?.isAnonymous) {
+      router.replace(ROUTES.DASHBOARD);
+    }
+  }, [getToken, isAuthenticated, user]);
 
   return (
     <React.Fragment>
       <Head>
         <title>Login | LeanUrls</title>
       </Head>
-      <Wrapper>
+      <Wrapper page='login'>
         <div className={classes.root}>
           <Grid
             container
@@ -68,27 +72,45 @@ export default function Login() {
                   component='h4'
                   variant='h6'
                   align='center'
-                  noWrap 
+                  noWrap
                   style={{ marginTop: 40 }}
                 >
                   Log in to your account.
                 </Typography>
-                {alert && <Alert severity={alert.severity} onClose={() => setAlert(null)}>
-                  <AlertTitle>{alert.severity}</AlertTitle>
-                  {alert.message}
-                </Alert>}
+                {alert && (
+                  <Alert severity='error' onClose={() => setAlert(false)}>
+                    <AlertTitle>{error?.code}</AlertTitle>
+                    {error?.message}
+                  </Alert>
+                )}
                 <Formik
                   initialValues={{
-                      email: '',
-                      password: '',
+                    email: '',
+                    password: 'password',
                   }}
-                  onSubmit={async ({email, password}) => {
+                  onSubmit={async ({ email, password }) => {
                     try {
-                      const { user } = await firebase.auth().signInWithEmailAndPassword(email, password)
-                      if (user) router.replace(ROUTES.DASHBOARD)
+                      await firebase
+                        .auth()
+                        .signInWithEmailAndPassword(email, password);
                     } catch (error) {
-                      console.log('error: ', error)
-                      error && setAlert({ message: error.message, severity: 'error' })
+                      const errorCode =
+                        error.code === 'auth/invalid-email'
+                          ? 'Invalid email'
+                          : error.code === 'auth/user-disabled'
+                          ? 'Account disabled'
+                          : 'User not found';
+                      const errorMsg =
+                        error.code === 'auth/wrong-password' ||
+                        error.code === 'auth/user-not-found'
+                          ? 'Either no user with that email exist or the password is invalid.'
+                          : error.message;
+
+                      setError({
+                        code: errorCode,
+                        message: errorMsg,
+                      });
+                      setAlert(true);
                     }
                   }}
                 >
@@ -100,7 +122,11 @@ export default function Login() {
                     <strong> Sign up here.</strong>
                   </Link>
                 </Typography>
-                <Typography paragraph variant='body2' style={{ marginTop: '2rem' }}>
+                <Typography
+                  paragraph
+                  variant='body2'
+                  style={{ marginTop: '2rem' }}
+                >
                   <Link href={ROUTES.PASSWORD_FORGET} color='primary'>
                     Forgot your password?
                   </Link>
@@ -111,5 +137,5 @@ export default function Login() {
         </div>
       </Wrapper>
     </React.Fragment>
-  )
+  );
 }

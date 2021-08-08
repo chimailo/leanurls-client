@@ -1,0 +1,14 @@
+query TableData(
+  $limit: Int,
+  $offset: Int,
+  $filter: FilterInput
+) {
+  getTableData(limit: $limit, offset: $offset, filter: $filter) {
+    id
+    alias
+    link
+    createdAt
+    numberOfHits
+    lastHit
+  }
+}

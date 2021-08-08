@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { FormikProps } from 'formik';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import LockIcon from '@material-ui/icons/Lock';
@@ -18,12 +18,24 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function LoginForm({formik}: {formik: FormikProps<{
-  email: string;
-  password: string;
-}>}) {
+export default function LoginForm({
+  formik,
+}: {
+  formik: FormikProps<{
+    email: string;
+    password: string;
+  }>;
+}) {
   const classes = useStyles();
-  const {values, isSubmitting, handleChange, handleBlur, handleSubmit} = formik
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+  } = formik;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -34,7 +46,7 @@ export default function LoginForm({formik}: {formik: FormikProps<{
         size='small'
         InputProps={{
           endAdornment: (
-            <InputAdornment position="end">
+            <InputAdornment position='end'>
               <MailIcon color='disabled' />
             </InputAdornment>
           ),
@@ -44,6 +56,8 @@ export default function LoginForm({formik}: {formik: FormikProps<{
         value={values.email}
         onChange={handleChange}
         onBlur={handleBlur}
+        helperText={errors.email && touched.email && errors.email}
+        error={!!(touched.email && errors.email)}
         fullWidth
       />
       <TextField
@@ -53,16 +67,18 @@ export default function LoginForm({formik}: {formik: FormikProps<{
         size='small'
         InputProps={{
           endAdornment: (
-              <InputAdornment position="end">
-                <LockIcon color='disabled' />
-              </InputAdornment>
-            ),
+            <InputAdornment position='end'>
+              <LockIcon color='disabled' />
+            </InputAdornment>
+          ),
         }}
         variant='outlined'
         className={classes.field}
         value={values.password}
         onChange={handleChange}
         onBlur={handleBlur}
+        helperText={errors.password && touched.password && errors.password}
+        error={!!(touched.password && errors.password)}
         fullWidth
       />
       <Button

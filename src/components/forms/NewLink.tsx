@@ -1,18 +1,13 @@
-import React from "react";
-import {  FormikProps } from "formik";
-import { Box, Typography, Button, TextField, Grid } from "@material-ui/core";
+import React from 'react';
+import { Box, Typography, Button, TextField } from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { LinkIcon, WandIcon } from '../svg'
+import { LinkIcon, WandIcon } from '../svg';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     label: {
       fontWeight: theme.typography.fontWeightMedium,
       marginLeft: theme.spacing(1),
-    },
-    form: {
-      maxWidth: 400,
-      margin: 'auto',
     },
     button: {
       borderRadius: 8,
@@ -25,18 +20,48 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function NewLinkForm({ formik, modal }: { modal?: boolean, formik: FormikProps<{
-  alias: string
-  link: string
-  domain: string
-}>}) {
-  const classes = useStyles()
-  const { values, isSubmitting, handleChange, handleBlur, handleSubmit } = formik
+interface FormProps {
+  link: string;
+  alias: string;
+}
+
+interface TouchedProps {
+  link: boolean;
+  alias: boolean;
+}
+
+interface NewLinkFormProps {
+  values: FormProps;
+  errors: FormProps;
+  touched: TouchedProps;
+  isSubmitting: boolean;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+}
+
+export default function NewLinkForm(props: NewLinkFormProps) {
+  const classes = useStyles();
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleFocus,
+    handleBlur,
+    handleSubmit,
+  } = props;
 
   return (
     <form onSubmit={handleSubmit}>
       <Box display='flex' alignItems='center' mt={3} mb={1}>
-        <LinkIcon viewBox="0 0 511.999 511.999" color='secondary' fontSize='small' />
+        <LinkIcon
+          viewBox='0 0 511.999 511.999'
+          color='secondary'
+          fontSize='small'
+        />
         <Typography
           variant='subtitle1'
           align='center'
@@ -49,15 +74,18 @@ export default function NewLinkForm({ formik, modal }: { modal?: boolean, formik
       <TextField
         name='link'
         type='text'
-          variant='outlined'
-          color='secondary'
+        variant='outlined'
+        color='secondary'
         value={values.link}
         onChange={handleChange}
         onBlur={handleBlur}
+        onFocus={handleFocus}
+        helperText={errors.link && touched.link && errors.link}
+        error={!!(touched.link && errors.link)}
         fullWidth
       />
       <Box display='flex' alignItems='center' mt={3} mb={1}>
-        <WandIcon viewBox="0 0 512 512" color='secondary' fontSize='small' />
+        <WandIcon viewBox='0 0 512 512' color='secondary' fontSize='small' />
         <Typography
           variant='subtitle1'
           align='center'
@@ -67,46 +95,34 @@ export default function NewLinkForm({ formik, modal }: { modal?: boolean, formik
           Customize your link
         </Typography>
       </Box>
-      <Grid container>
-        <Grid item xs={12} md={6} >
-          <TextField
-            name='domain'
-            type='text'
-              variant='outlined'
-              color='secondary'
-            fullWidth
-            disabled
-          value={values.domain}
-          />
-        </Grid>
-        <Grid item xs={12} md={6} >
-        <TextField
-          name='alias'
-          type='text'
-            variant='outlined'
-            color='secondary'
-            placeholder='alias'
-          value={values.alias}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          fullWidth
-        />
-        </Grid>
-      </Grid>
-      {!modal && 
+      <TextField
+        name='alias'
+        type='text'
+        variant='outlined'
+        color='secondary'
+        placeholder='alias'
+        value={values.alias}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        helperText={errors.alias && touched.alias && errors.alias}
+        error={!!(touched.alias && errors.alias)}
+        fullWidth
+      />
+      <Box display='flex' alignItems='center' justifyContent='flex-end'>
         <Button
+          disableElevation
+          fullWidth
           type='submit'
           size='large'
           color='primary'
           variant='contained'
           className={classes.button}
-          disableElevation
-          fullWidth
           disabled={isSubmitting}
         >
           Make LeanUrl
         </Button>
-      }
+      </Box>
     </form>
-  )
+  );
 }

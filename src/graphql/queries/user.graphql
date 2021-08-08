@@ -1,9 +1,8 @@
-query Me {
+query User {
   me {
     id
     name
-    email
     avatar
-    createdAt
+    isActive
   }
 }

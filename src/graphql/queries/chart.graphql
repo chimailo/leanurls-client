@@ -1,0 +1,9 @@
+query LinksData {
+  getMyLinksCount
+  getMyHitsCount
+  getMyLastHitTime
+  getChartData {
+    alias
+    hits
+  }
+}

@@ -1,10 +1,9 @@
-import React from "react"
-import { Box, AppBarProps } from "@material-ui/core"
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
-import Footer from "./Footer"
-import Header from "./Header"
-import { bg } from "../lib/constants"
-import { MeQuery } from "../generated/graphql"
+import React from 'react';
+import { Box } from '@material-ui/core';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import Footer from './Footer';
+import Header from './Header';
+import { bg } from '../lib/constants';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -12,38 +11,30 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
-      backgroundImage: (props: LayoutProps) => props.headerProps ? 'unset' : bg,
+      backgroundImage: (props: LayoutProps) => (props.page ? bg : 'unset'),
       backgroundColor: (props: LayoutProps) =>
-        (props.headerProps && props.headerProps.page === 'dashboard')
-          ? theme.palette.background.default
-          : 'unset',
+        props.page ? 'unset' : theme.palette.background.default,
     },
   })
-)
+);
 
 interface LayoutProps {
-  user?: MeQuery['me']
-  headerProps?: {
-    bgColor: AppBarProps["color"],
-    page: string
-  }
+  page?: string;
 }
 
 const Wrapper: React.FC<LayoutProps> = (props) => {
-  const classes = useStyles(props)
-  const { children, headerProps, user } = props
-  const page = headerProps ? headerProps.page : ''
-  const bgColor = headerProps ? headerProps.bgColor : 'transparent'
-  
+  const classes = useStyles(props);
+  const { children, page } = props;
+
   return (
     <div className={classes.box}>
       <Box flexGrow={1}>
-        <Header bgColor={bgColor} page={page} user={user} />
+        <Header page={page} />
         {children}
       </Box>
       <Footer page={page} />
     </div>
-  )
-}
+  );
+};
 
-export default  Wrapper
+export default Wrapper;

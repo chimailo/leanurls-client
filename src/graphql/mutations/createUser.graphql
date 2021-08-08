@@ -1,5 +1,5 @@
 mutation CreateUser($name: String!, $email: String!) {
-  createUser(data: {
+  createUser(values: {
     name: $name,
     email: $email
   }) {
