@@ -1,3 +1,6 @@
+import router from 'next/router';
+import * as ROUTES from './routes';
+
 export const isBrowser = typeof window !== `undefined`;
 
 export const getToken = () =>
@@ -8,6 +11,7 @@ export const logout = (callback: () => void) => {
 
   callback();
   setToken('');
+  router.replace(ROUTES.LOGIN);
 };
 
 export const setToken = (token: string) =>

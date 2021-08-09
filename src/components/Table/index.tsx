@@ -97,6 +97,7 @@ export default function EnhancedTable({ totalItems }: EnhancedTableProps) {
   const classes = useStyles();
   const { data, loading, error, fetchMore, refetch } = useTableDataQuery({
     notifyOnNetworkStatusChange: true,
+    variables: { limit: ITEMS_PER_PAGE },
     onCompleted: (data) => setRows(getRows(data.getTableData)),
   });
   const [deleteLink] = useDeleteLinkMutation();
@@ -166,10 +167,8 @@ export default function EnhancedTable({ totalItems }: EnhancedTableProps) {
   };
 
   const handleRowDelete = async (id: string) => {
-    await deleteLink({ variables: { id } });
-    const rem = rows.filter((row) => row.id !== id);
-    setRows(rem);
-    await refetch();
+    const res = await deleteLink({ variables: { id } });
+    res && setRows(rows.filter((row) => row.id !== id));
   };
 
   const handleDisable = async (id: string) => {};
@@ -290,7 +289,7 @@ export default function EnhancedTable({ totalItems }: EnhancedTableProps) {
                             aria-label='copy link to clipboard'
                             onClick={() =>
                               copyToClipboard(
-                                `${process.env.NEXT_PUBLIC_HOST_URL}${row.alias}`
+                                `${process.env.NEXT_PUBLIC_HOST_URL}_/${row.alias}`
                               )
                             }
                           >

@@ -96,6 +96,7 @@ export default function NewLinkModal(props: NewLinkModalProps) {
       await createLink({ variables: values });
       if (handleRefetch) await handleRefetch();
       handleReset();
+      handleClose();
       setSubmitting(false);
     } catch (err) {
       if (err.name === 'ValidationError') {

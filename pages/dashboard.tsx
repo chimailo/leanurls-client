@@ -36,10 +36,12 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (!getToken() && (!user || user?.isAnonymous)) {
+    console.log(!getToken());
+    console.log(user && user.isAnonymous);
+    if (!getToken() || (user && user.isAnonymous)) {
       router.replace(ROUTES.LOGIN);
     }
-  }, []);
+  }, [user?.isAnonymous]);
 
   const getChartLabels = () => data?.getChartData.map((item) => item.alias);
   const getChartValues = () => data?.getChartData.map((item) => item.hits);

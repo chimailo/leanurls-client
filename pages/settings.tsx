@@ -135,7 +135,7 @@ export default function Settings() {
   const [updateUser] = useUpdateUserMutation();
 
   useEffect(() => {
-    if (!getToken() && user && user.isAnonymous) {
+    if (!getToken() || (user && user.isAnonymous)) {
       router.replace(ROUTES.LOGIN);
     }
   }, []);

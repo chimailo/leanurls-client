@@ -1,5 +1,5 @@
 query TableData(
-  $limit: Int,
+  $limit: Int!,
   $offset: Int,
   $filter: FilterInput
 ) {

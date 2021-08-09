@@ -95,7 +95,7 @@ export type QueryGetLinkArgs = {
 export type QueryGetTableDataArgs = {
   filter?: Maybe<FilterInput>;
   offset?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
+  limit: Scalars['Int'];
 };
 
 export type SignupInput = {
@@ -199,7 +199,7 @@ export type LinksDataQuery = (
 );
 
 export type TableDataQueryVariables = Exact<{
-  limit?: Maybe<Scalars['Int']>;
+  limit: Scalars['Int'];
   offset?: Maybe<Scalars['Int']>;
   filter?: Maybe<FilterInput>;
 }>;
@@ -438,7 +438,7 @@ export type LinksDataQueryHookResult = ReturnType<typeof useLinksDataQuery>;
 export type LinksDataLazyQueryHookResult = ReturnType<typeof useLinksDataLazyQuery>;
 export type LinksDataQueryResult = Apollo.QueryResult<LinksDataQuery, LinksDataQueryVariables>;
 export const TableDataDocument = gql`
-    query TableData($limit: Int, $offset: Int, $filter: FilterInput) {
+    query TableData($limit: Int!, $offset: Int, $filter: FilterInput) {
   getTableData(limit: $limit, offset: $offset, filter: $filter) {
     id
     alias
@@ -468,7 +468,7 @@ export const TableDataDocument = gql`
  *   },
  * });
  */
-export function useTableDataQuery(baseOptions?: Apollo.QueryHookOptions<TableDataQuery, TableDataQueryVariables>) {
+export function useTableDataQuery(baseOptions: Apollo.QueryHookOptions<TableDataQuery, TableDataQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<TableDataQuery, TableDataQueryVariables>(TableDataDocument, options);
       }
