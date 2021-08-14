@@ -64,8 +64,11 @@ function createApolloClient() {
   );
 
   const httpLink = new HttpLink({
-    uri: 'http://localhost:8000/graphql',
     credentials: 'same-origin',
+    uri:
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:8000/graphql'
+        : process.env.NEXT_PUBLIC_HOST_URL,
   });
 
   const retryLink = new RetryLink();

@@ -36,8 +36,6 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    console.log(!getToken());
-    console.log(user && user.isAnonymous);
     if (!getToken() || (user && user.isAnonymous)) {
       router.replace(ROUTES.LOGIN);
     }

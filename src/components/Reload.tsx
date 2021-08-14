@@ -1,12 +1,13 @@
-import React from 'react'
+import React from 'react';
 import { ApolloError } from '@apollo/client';
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { Box, Button, Container, Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { useUser } from '../lib/hooks';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     wrapper: {
       display: 'flex',
@@ -19,27 +20,33 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function ErrorReload({ error }: { error?: ApolloError }) {
-  const router = useRouter()
-  const classes = useStyles()
-  
+  const { user } = useUser();
+  const router = useRouter();
+  const classes = useStyles();
+
   return (
     <span className={classes.wrapper}>
-      <Typography variant='h6'>
-        <ErrorOutlineIcon />&nbsp;
+      <Typography
+        variant='h6'
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <ErrorOutlineIcon />
+        &nbsp;
         {error?.name}
       </Typography>
-      <Typography>
-        An unexpected error ocurred, please try again.
-      </Typography>
+      <Typography>An unexpected error ocurred, please try again.</Typography>
       <Button
         disableElevation
         color='secondary'
         variant='contained'
         startIcon={<RefreshIcon />}
-        onClick={() => router.reload()}
+        onClick={() => {
+          user?.getIdToken(true);
+          router.reload();
+        }}
       >
         Retry
       </Button>
     </span>
-  )
+  );
 }

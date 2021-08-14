@@ -113,6 +113,7 @@ export default function UrlForm() {
 
     try {
       await validationSchema.validate(values);
+      setError(undefined);
       setSubmitting(true);
       if (!isAuthenticated) {
         await firebase.auth().signInAnonymously();
